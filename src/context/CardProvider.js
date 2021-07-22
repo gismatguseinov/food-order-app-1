@@ -8,9 +8,52 @@ const defaultCardState = {
 
 const cardReducer = (state, action) => {
   if (action.type === "ADD") {
-    const updatedItems = state.items.concat(action.item);
     const updatedTotalAmount =
       state.totalAmount + action.item.price * action.item.amount;
+    const exisitingCardItemIndex = state.item.findIndex(
+      (i) => i.id === action.item.id
+    );
+
+    const exisitingCardItem = state.item[exisitingCardItemIndex];
+
+    let updatedItems;
+    if (exisitingCardItem) {
+      const updatedItem = {
+        ...exisitingCardItem,
+        amount: exisitingCardItem.amount + action.item.amount,
+      };
+      updatedItems = [...state.item];
+      updatedItems[exisitingCardItemIndex] = updatedItem;
+    } else {
+      updatedItems = state.item.concat(action.item);
+    }
+
+    return {
+      item: updatedItems,
+      totalAmount: updatedTotalAmount,
+    };
+  }
+  if (action.type === "REMOVE") {
+    const exisitingCardItemIndex = state.item.findIndex(
+      (i) => i.id === action.id
+    );
+    const exisitingCardItem = state.item[exisitingCardItemIndex];
+
+    const updatedTotalAmount = state.totalAmount - exisitingCardItem.price;
+
+    let updatedItems;
+
+    if (exisitingCardItem.amount === 1) {
+      updatedItems = state.item.filter((i) => i.id !== action.id);
+    } else {
+      const updatedItem = {
+        ...exisitingCardItem,
+        amount: exisitingCardItem.amount - 1,
+      };
+      updatedItems = [...state.item];
+      updatedItems[exisitingCardItemIndex] = updatedItem;
+    }
+
     return {
       item: updatedItems,
       totalAmount: updatedTotalAmount,
